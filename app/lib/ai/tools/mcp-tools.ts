@@ -99,7 +99,7 @@ export const progressTrackingTool = new DynamicStructuredTool({
   schema: z.object({
     userId: z.string().describe("User ID"),
     lessonId: z.string().describe("Lesson ID completed"),
-    score: z.number().describe("Score achieved"),
+    score: z.coerce.number().describe("Score achieved"),
     skillsImproved: z.array(z.string()).describe("List of skills improved (e.g., Vocabulary, Grammar)"),
   }),
   func: async ({ userId, lessonId, score, skillsImproved }: any) => {

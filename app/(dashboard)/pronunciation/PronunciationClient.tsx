@@ -63,7 +63,9 @@ export default function PronunciationClient({
   // Initialize AudioContext
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    audioContextRef.current = new (
+      window.AudioContext || (window as any).webkitAudioContext
+    )();
     return () => {
       audioContextRef.current?.close();
     };
@@ -80,12 +82,14 @@ export default function PronunciationClient({
     if (refAudioBuffer && refCanvasRef.current) {
       drawWaveform(refAudioBuffer, refCanvasRef.current, "#3b82f6"); // Blue for reference
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refAudioBuffer]);
 
   useEffect(() => {
     if (userAudioBuffer && userCanvasRef.current) {
       drawWaveform(userAudioBuffer, userCanvasRef.current, "#22c55e"); // Green for user
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userAudioBuffer]);
 
   if (!isPro) {

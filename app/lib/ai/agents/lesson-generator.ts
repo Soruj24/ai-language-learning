@@ -3,7 +3,7 @@ import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 import { vocabularyGeneratorTool, translationTool } from "../tools/mcp-tools";
 
-const tools = [vocabularyGeneratorTool, translationTool];
+const tools = [translationTool];
 
 export async function createLessonGeneratorAgent(targetLanguage: string = 'Spanish') {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
