@@ -11,7 +11,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/app/components/ui/card";
-import { ScrollArea } from "@/app/components/ui/scroll-area";
 import {
   Send,
   Mic,
