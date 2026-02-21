@@ -49,14 +49,17 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       }
       
       if (token.role && session.user) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session.user as any).role = token.role as string;
       }
 
       if (token.languageLearning && session.user) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session.user as any).languageLearning = token.languageLearning as string;
       }
       
       if (token.interfaceLanguage && session.user) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session.user as any).interfaceLanguage = token.interfaceLanguage as string;
       }
 

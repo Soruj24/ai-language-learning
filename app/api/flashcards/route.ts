@@ -4,7 +4,7 @@ import User from "@/app/lib/models/User";
 import { calculateSRS } from "@/app/lib/srs";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,6 +17,7 @@ export async function GET(req: Request) {
   }
 
   const now = new Date();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dueFlashcards = (user.flashcards || []).filter((card: any) => {
     return new Date(card.nextReview) <= now;
   });

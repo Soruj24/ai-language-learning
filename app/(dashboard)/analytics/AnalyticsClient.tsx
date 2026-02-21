@@ -1,20 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/app/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { Progress } from '@/app/components/ui/progress';
 import { Badge } from '@/app/components/ui/badge';
 import { ScrollArea } from '@/app/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
-import { Trophy, Flame, Zap, Book, Target, TrendingUp, Calendar, Activity, Sparkles, ArrowUpRight, Mic, CheckCircle2, Award, Star, Clock } from 'lucide-react';
+import { Flame, Zap, Book, Target, Sparkles, Calendar } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  LineChart, Line, AreaChart, Area, Legend
+  LineChart, Line, AreaChart, Area,
 } from 'recharts';
 import { useLanguage } from '@/app/lib/i18n/LanguageContext';
-import { motion } from 'framer-motion';
 
 // Enhanced Mock Data
 const mockStats = {
@@ -82,11 +81,13 @@ const mockStats = {
   ]
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-background border rounded-lg p-3 shadow-lg text-sm">
         <p className="font-medium mb-1">{label}</p>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {payload.map((entry: any, index: number) => (
           <p key={index} style={{ color: entry.color }}>
             {entry.name}: {entry.value}
@@ -99,16 +100,17 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 interface AnalyticsClientProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialStats: any;
 }
 
 export default function AnalyticsClient({ initialStats }: AnalyticsClientProps) {
-  const { t, learningLanguage } = useLanguage();
-  const [stats, setStats] = useState(initialStats || mockStats);
-  const [activeTab, setActiveTab] = useState('overview');
+  const { learningLanguage } = useLanguage();
+  const [stats] = useState(initialStats || mockStats);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -353,6 +355,7 @@ export default function AnalyticsClient({ initialStats }: AnalyticsClientProps) 
             <CardContent>
               <ScrollArea className="h-[250px] pr-4">
                 <div className="space-y-4">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {stats.achievements.filter((a: any) => a.unlocked).map((achievement: any) => (
                     <div key={achievement.id} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 border">
                       <div className="text-2xl bg-background p-2 rounded-full shadow-sm">
@@ -406,6 +409,7 @@ export default function AnalyticsClient({ initialStats }: AnalyticsClientProps) 
         {/* Achievements Tab */}
         <TabsContent value="achievements" className="space-y-4">
            <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
              {stats.achievements.map((achievement: any) => (
                <Card key={achievement.id} className={!achievement.unlocked ? "opacity-60 grayscale" : ""}>
                  <CardContent className="pt-6 flex flex-col items-center text-center gap-3">

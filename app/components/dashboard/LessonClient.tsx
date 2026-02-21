@@ -11,11 +11,15 @@ import {
   CardTitle,
   CardDescription,
 } from "@/app/components/ui/card";
+import { ScrollArea } from "@/app/components/ui/scroll-area";
 import {
   Send,
   Mic,
   ArrowLeft,
   Lightbulb,
+  Sparkles,
+  WifiOff,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { useOffline } from "@/app/lib/hooks/use-offline";
@@ -36,7 +40,6 @@ interface Message {
 }
 
 export default function LessonClient({ id }: LessonClientProps) {
-  const [started, setStarted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -50,8 +53,9 @@ export default function LessonClient({ id }: LessonClientProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const isOffline = useOffline();
-  const { saveProgress, pendingCount } = useSync();
+  const { saveProgress } = useSync();
   const [isSaved, setIsSaved] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isCompleted, setIsCompleted] = useState(false);
 
   const handleExerciseResult = async (
@@ -88,7 +92,7 @@ export default function LessonClient({ id }: LessonClientProps) {
             const parsed = JSON.parse(saved);
             setLessonPlan(parsed);
             setMode("plan");
-            setStarted(true);
+            // setStarted(true);
           } catch (e) {
             console.error("Failed to load offline lesson", e);
           }
@@ -138,7 +142,6 @@ export default function LessonClient({ id }: LessonClientProps) {
       if (saved) {
         setLessonPlan(JSON.parse(saved));
         setMode("plan");
-        setStarted(true);
         return;
       }
       return;
@@ -151,6 +154,7 @@ export default function LessonClient({ id }: LessonClientProps) {
         body: JSON.stringify({
           agent: "lesson-generator",
           input: `Language: ${config.language}, Level: ${config.level}, Topic: ${config.topic}`,
+          learningLanguage: config.language,
         }),
       });
 
@@ -171,7 +175,6 @@ export default function LessonClient({ id }: LessonClientProps) {
 
   const startPractice = async () => {
     setMode("chat");
-    setStarted(true);
     setIsLoading(true);
 
     // Initial prompt with lesson context
@@ -190,6 +193,7 @@ export default function LessonClient({ id }: LessonClientProps) {
         body: JSON.stringify({
           agent: "tutor",
           input: contextPrompt,
+          learningLanguage: config.language,
         }),
       });
 
@@ -227,6 +231,7 @@ export default function LessonClient({ id }: LessonClientProps) {
         body: JSON.stringify({
           agent: "tutor",
           input: text,
+          learningLanguage: config.language,
         }),
       });
 

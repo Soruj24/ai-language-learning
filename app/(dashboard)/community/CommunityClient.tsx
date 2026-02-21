@@ -7,7 +7,7 @@ import { Input } from '@/app/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
 import { Badge } from '@/app/components/ui/badge';
 import { useLanguage } from '@/app/lib/i18n/LanguageContext';
-import { MessageSquare, ThumbsUp, Users, Share2, BookOpen, PenTool } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Users, Share2 } from 'lucide-react';
 
 // Mock Data
 const initialPosts = [
@@ -35,7 +35,7 @@ const initialResources = [
 export default function CommunityClient() {
   const { t } = useLanguage();
   const [posts, setPosts] = useState(initialPosts);
-  const [groups, setGroups] = useState(initialGroups);
+  const [groups] = useState(initialGroups);
   const [corrections, setCorrections] = useState(initialCorrections);
   const [resources, setResources] = useState(initialResources);
   const [newPostContent, setNewPostContent] = useState('');

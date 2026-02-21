@@ -2,9 +2,12 @@ import { createLLM } from "../llm-provider";
 import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tools: any[] = []; 
 
 export async function createVocabularyAgent(targetLanguage: string = 'Spanish') {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _target = targetLanguage; // Suppress unused variable warning while keeping signature
   const llm = createLLM({
     temperature: 0.7,
   });

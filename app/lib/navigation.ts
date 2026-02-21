@@ -7,7 +7,6 @@ import {
   BarChart, 
   Users, 
   Settings,
-  CalendarCheck,
   Brain,
   GraduationCap
 } from 'lucide-react';

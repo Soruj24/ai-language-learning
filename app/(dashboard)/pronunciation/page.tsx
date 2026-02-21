@@ -1,4 +1,3 @@
-import { auth } from "@/app/lib/auth";
 import { checkSubscription } from "@/app/lib/subscription";
 import PronunciationClient from "./PronunciationClient";
 

@@ -13,6 +13,7 @@ export async function POST(req: Request) {
     let targetLanguage = learningLanguage;
     if (!targetLanguage) {
       const session = await auth();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       targetLanguage = (session?.user as any)?.languageLearning || 'Spanish';
     }
 

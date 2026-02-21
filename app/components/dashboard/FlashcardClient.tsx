@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/app/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/app/components/ui/card';
-import { ArrowLeft, CheckCircle, RefreshCw, XCircle, Brain, RotateCcw } from 'lucide-react';
+import { Card } from '@/app/components/ui/card';
+import { ArrowLeft, CheckCircle, RefreshCw, Brain, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 import { Progress } from '@/app/components/ui/progress';
 
@@ -85,7 +85,7 @@ export default function FlashcardClient() {
         <div>
           <h2 className="text-2xl font-bold mb-2">All caught up!</h2>
           <p className="text-muted-foreground max-w-md">
-            You've reviewed all your due flashcards for now. Come back later for more practice.
+            You&apos;ve reviewed all your due flashcards for now. Come back later for more practice.
           </p>
         </div>
         <Link href="/dashboard">
@@ -104,7 +104,7 @@ export default function FlashcardClient() {
         <div>
           <h2 className="text-2xl font-bold mb-2">No flashcards due</h2>
           <p className="text-muted-foreground max-w-md">
-            You don't have any flashcards to review right now. Complete more lessons to build your deck!
+            You don&apos;t have any flashcards to review right now. Complete more lessons to build your deck!
           </p>
         </div>
         <Link href="/lesson">

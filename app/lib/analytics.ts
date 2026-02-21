@@ -2,7 +2,7 @@ import { auth } from "@/app/lib/auth";
 import connectDB from "@/app/lib/db";
 import User from "@/app/lib/models/User";
 import Progress from "@/app/lib/models/Progress";
-import { startOfWeek, endOfWeek, eachDayOfInterval, format, subDays } from "date-fns";
+import { eachDayOfInterval, format, subDays } from "date-fns";
 
 export async function getAnalyticsData() {
   const session = await auth();
@@ -71,7 +71,7 @@ export async function getAnalyticsData() {
   let cumulativeWords = 0;
   const vocabularyGrowth = progressData
     .filter(p => p.completed)
-    .map((p, index) => {
+    .map((p) => {
       cumulativeWords += 10; // Placeholder increment
       return {
         week: format(p.updatedAt || p.createdAt, "MMM d"),
@@ -117,6 +117,7 @@ export async function getAnalyticsData() {
   ];
 
   const achievements = allAchievements.map(ach => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const unlocked = userAchievements.find((ua: any) => ua.id === ach.id || ua.name === ach.name);
     return {
       ...ach,

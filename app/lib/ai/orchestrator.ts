@@ -8,6 +8,7 @@ import { createVocabularyAgent } from "./agents/vocabulary";
 
 export type AgentType = "tutor" | "pronunciation" | "grammar" | "conversation" | "progress" | "lesson-generator" | "vocabulary";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function processUserRequest(agentType: AgentType, input: any, targetLanguage: string = 'Spanish') {
   let executor;
 
@@ -37,6 +38,7 @@ export async function processUserRequest(agentType: AgentType, input: any, targe
       throw new Error(`Unknown agent type: ${agentType}`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let invokePayload: any = { targetLanguage };
   if (typeof input === 'string') {
     invokePayload.input = input;
@@ -71,7 +73,7 @@ export async function processUserRequest(agentType: AgentType, input: any, targe
         jsonString = jsonString.substring(firstBrace, lastBrace + 1);
     }
     return JSON.parse(jsonString);
-  } catch (e) {
+  } catch {
     // Fallback if not valid JSON
     console.warn("Agent did not return valid JSON:", result.output);
     return {

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Button } from "@/app/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -55,7 +56,12 @@ export function Hero() {
           <div className="flex -space-x-3">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className={`w-10 h-10 rounded-full border-2 border-[#0F172A] bg-gray-800 flex items-center justify-center overflow-hidden relative z-[${10-i}]`}>
-                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i+10}`} alt="User" />
+                <Image 
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i+10}`} 
+                  alt="User"
+                  width={40}
+                  height={40}
+                />
               </div>
             ))}
           </div>

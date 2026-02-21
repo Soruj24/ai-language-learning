@@ -35,7 +35,7 @@ export function Testimonials() {
             Loved by <span className="text-indigo-400">learners</span> worldwide
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-            Don't just take our word for it. See what our community has to say.
+            Don&apos;t just take our word for it. See what our community has to say.
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export function Testimonials() {
                     </div>
                   </div>
                   <p className="text-gray-300 leading-relaxed italic relative z-10">
-                    "{testimonial.quote}"
+                    &quot;{testimonial.quote}&quot;
                   </p>
                 </CardContent>
               </Card>

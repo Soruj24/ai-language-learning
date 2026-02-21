@@ -6,6 +6,8 @@ import { speechToTextTool, textToSpeechTool } from "../tools/mcp-tools";
 const tools = [speechToTextTool, textToSpeechTool];
 
 export async function createConversationAgent(targetLanguage: string = 'Spanish') {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _target = targetLanguage; // Suppress unused variable warning while keeping signature
   const llm = createLLM({
     temperature: 0.8,
   });

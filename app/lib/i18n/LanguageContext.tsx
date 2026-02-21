@@ -24,24 +24,33 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const storedInterface = localStorage.getItem('interfaceLanguage') as Language;
     const storedLearning = localStorage.getItem('learningLanguage') as Language;
 
-    if (storedInterface) setInterfaceLanguageState(storedInterface);
-    if (storedLearning) setLearningLanguageState(storedLearning);
+    if (storedInterface && storedInterface !== interfaceLanguage) {
+      setInterfaceLanguageState(storedInterface);
+    }
+    if (storedLearning && storedLearning !== learningLanguage) {
+      setLearningLanguageState(storedLearning);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
+  useEffect(() => {
     // Sync with session if available
     if (session?.user) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const userInterface = (session.user as any).interfaceLanguage as Language;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const userLearning = (session.user as any).languageLearning as Language;
 
-      if (userInterface) {
+      if (userInterface && userInterface !== interfaceLanguage) {
         setInterfaceLanguageState(userInterface);
         localStorage.setItem('interfaceLanguage', userInterface);
       }
-      if (userLearning) {
+      if (userLearning && userLearning !== learningLanguage) {
         setLearningLanguageState(userLearning);
         localStorage.setItem('learningLanguage', userLearning);
       }
     }
-  }, [session]);
+  }, [session, interfaceLanguage, learningLanguage]);
 
   const setInterfaceLanguage = async (lang: Language) => {
     setInterfaceLanguageState(lang);

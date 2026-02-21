@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Square, Play, RefreshCw, Volume2, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/app/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/app/components/ui/card';
 import { Progress } from '@/app/components/ui/progress';
 
 interface SpeechTrainerProps {
@@ -39,6 +39,7 @@ export default function SpeechTrainer({ targetText, onComplete }: SpeechTrainerP
       cleanupAudio();
       if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const cleanupAudio = () => {
@@ -62,6 +63,7 @@ export default function SpeechTrainer({ targetText, onComplete }: SpeechTrainerP
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       audioContextRef.current = audioContext;
       
@@ -197,7 +199,7 @@ export default function SpeechTrainer({ targetText, onComplete }: SpeechTrainerP
       <div className="text-lg font-medium text-center flex flex-wrap justify-center gap-1">
         {words.map((word, index) => {
           // Simple matching, removing punctuation for comparison
-          const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+          const cleanWord = word.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
           const isMispronounced = result.mispronouncedWords.some(
             mw => mw.toLowerCase() === cleanWord.toLowerCase()
           );

@@ -15,6 +15,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://lingua-ai.com"),
   title: {
     default: "LinguaAI - AI Language Tutor",
     template: "%s | LinguaAI"

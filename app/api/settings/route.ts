@@ -15,6 +15,7 @@ export async function POST(req: Request) {
 
     await connectDB();
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
     if (interfaceLanguage) updateData.interfaceLanguage = interfaceLanguage;
     if (languageLearning) updateData.languageLearning = languageLearning;

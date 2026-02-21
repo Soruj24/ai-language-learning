@@ -37,7 +37,8 @@ LinguaAI is a modern, adaptive language learning platform that leverages Artific
 
 - Node.js 18+ installed.
 - MongoDB instance (local or Atlas).
-- API Keys for OpenAI (or preferred LLM provider) and Google OAuth (optional).
+- Ollama installed and running (for local LLM).
+- API Keys for Google OAuth (optional).
 
 ### Installation
 
@@ -60,7 +61,8 @@ LinguaAI is a modern, adaptive language learning platform that leverages Artific
     MONGODB_URI=your_mongodb_connection_string
     NEXTAUTH_SECRET=your_nextauth_secret
     NEXTAUTH_URL=http://localhost:3000
-    OPENAI_API_KEY=your_openai_api_key
+    OLLAMA_BASE_URL=http://localhost:11434
+    OLLAMA_MODEL=llama3.2
     GOOGLE_CLIENT_ID=your_google_client_id
     GOOGLE_CLIENT_SECRET=your_google_client_secret
     ```

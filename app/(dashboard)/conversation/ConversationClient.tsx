@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Send, 
   Mic, 
@@ -17,14 +17,11 @@ import {
   ChevronRight,
   History,
   Plus,
-  Lock,
   Globe
 } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
-import { Input } from '@/app/components/ui/input';
 import { ScrollArea } from '@/app/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/app/components/ui/card';
-import { Separator } from '@/app/components/ui/separator';
 import { Badge } from '@/app/components/ui/badge';
 import { cn } from '@/app/lib/utils';
 import { useLanguage } from '@/app/lib/i18n/LanguageContext';
@@ -67,57 +64,13 @@ export default function ConversationClient({ isPremium }: ConversationClientProp
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMode, setSelectedMode] = useState('casual');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [sessions, setSessions] = useState<ChatSession[]>([
+  const [sessions] = useState<ChatSession[]>([
     { id: '1', title: 'Ordering Coffee', date: new Date(), preview: 'Can I have a latte please?' },
     { id: '2', title: 'Job Interview Practice', date: new Date(Date.now() - 86400000), preview: 'Tell me about yourself.' },
   ]);
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  if (!isPremium) {
-    return (
-      <div className="flex items-center justify-center h-[80vh]">
-        <Card className="w-full max-w-md text-center border-yellow-500/50 shadow-xl bg-gradient-to-b from-background to-yellow-50/10">
-          <CardHeader>
-            <div className="mx-auto bg-gradient-to-br from-yellow-400 to-amber-600 p-4 rounded-full mb-4 shadow-lg">
-              <Sparkles className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl">Premium Feature Locked</CardTitle>
-            <CardDescription>
-              The AI Tutor is available exclusively for Premium members.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              Unlock unlimited 1-on-1 conversations with our advanced AI tutor, complete with real-time corrections and role-play scenarios.
-            </p>
-            <ul className="text-left space-y-3 mb-6 text-sm">
-              <li className="flex items-center gap-3">
-                <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full"><Bot className="w-4 h-4 text-green-600" /></div>
-                <span>Unlimited AI conversations</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="bg-blue-100 dark:bg-blue-900/30 p-1 rounded-full"><Briefcase className="w-4 h-4 text-blue-600" /></div>
-                <span>Business & Travel scenarios</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="bg-purple-100 dark:bg-purple-900/30 p-1 rounded-full"><Languages className="w-4 h-4 text-purple-600" /></div>
-                <span>Instant grammar corrections</span>
-              </li>
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <Link href="/billing" className="w-full">
-              <Button className="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white border-0" size="lg">
-                Get Premium
-              </Button>
-            </Link>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
 
   useEffect(() => {
     // Scroll to bottom on new messages
@@ -182,6 +135,50 @@ export default function ConversationClient({ isPremium }: ConversationClientProp
       setIsLoading(false);
     }
   };
+
+  if (!isPremium) {
+    return (
+      <div className="flex items-center justify-center h-[80vh]">
+        <Card className="w-full max-w-md text-center border-yellow-500/50 shadow-xl bg-gradient-to-b from-background to-yellow-50/10">
+          <CardHeader>
+            <div className="mx-auto bg-gradient-to-br from-yellow-400 to-amber-600 p-4 rounded-full mb-4 shadow-lg">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <CardTitle className="text-2xl">Premium Feature Locked</CardTitle>
+            <CardDescription>
+              The AI Tutor is available exclusively for Premium members.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              Unlock unlimited 1-on-1 conversations with our advanced AI tutor, complete with real-time corrections and role-play scenarios.
+            </p>
+            <ul className="text-left space-y-3 mb-6 text-sm">
+              <li className="flex items-center gap-3">
+                <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full"><Bot className="w-4 h-4 text-green-600" /></div>
+                <span>Unlimited AI conversations</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="bg-blue-100 dark:bg-blue-900/30 p-1 rounded-full"><Briefcase className="w-4 h-4 text-blue-600" /></div>
+                <span>Business & Travel scenarios</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="bg-purple-100 dark:bg-purple-900/30 p-1 rounded-full"><Languages className="w-4 h-4 text-purple-600" /></div>
+                <span>Instant grammar corrections</span>
+              </li>
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Link href="/billing" className="w-full">
+              <Button className="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white border-0" size="lg">
+                Get Premium
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden bg-background border rounded-lg shadow-sm">
@@ -268,7 +265,7 @@ export default function ConversationClient({ isPremium }: ConversationClientProp
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center mt-4">
                   <Badge variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => setInput("How do I say 'Hello'?")}>
-                    How do I say "Hello"?
+                    How do I say &quot;Hello&quot;?
                   </Badge>
                   <Badge variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => setInput("Let's practice ordering food.")}>
                     Practice ordering food

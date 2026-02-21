@@ -1,16 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/app/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
 import { Badge } from '@/app/components/ui/badge';
 import { ScrollArea } from '@/app/components/ui/scroll-area';
-import { Separator } from '@/app/components/ui/separator';
 import { Progress } from '@/app/components/ui/progress';
-import { Loader2, BookOpen, CheckCircle, HelpCircle, ArrowRight, RefreshCw, Volume2, AlertCircle } from 'lucide-react';
+import { Loader2, BookOpen, CheckCircle, HelpCircle, ArrowRight, Volume2, AlertCircle } from 'lucide-react';
 import { useLanguage } from '@/app/lib/i18n/LanguageContext';
 
 interface VocabularyItem {
@@ -217,7 +216,7 @@ export default function VocabularyClient() {
                           </div>
                           <div className="italic text-muted-foreground">
                             <span className="font-semibold not-italic text-foreground">{t('example')}: </span>
-                            "{item.example}"
+                            &quot;{item.example}&quot;
                           </div>
                         </CardContent>
                       </Card>

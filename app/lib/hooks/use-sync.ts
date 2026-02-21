@@ -10,45 +10,45 @@ export interface ProgressData {
 
 export function useSync() {
   const isOffline = useOffline();
-  const [pendingSync, setPendingSync] = useState<ProgressData[]>([]);
-
-  // Load pending sync on mount
-  useEffect(() => {
-    const stored = localStorage.getItem('pendingProgress');
-    if (stored) {
-      try {
-        setPendingSync(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to parse pending progress', e);
+  const [pendingSync, setPendingSync] = useState<ProgressData[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('pendingProgress');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (e) {
+          console.error('Failed to parse pending progress', e);
+        }
       }
     }
-  }, []);
+    return [];
+  });
 
   // Sync when coming back online
   useEffect(() => {
+    const syncData = async () => {
+      const remaining: ProgressData[] = [];
+      for (const item of pendingSync) {
+        const success = await sendProgressToServer(item);
+        if (!success) {
+          remaining.push(item);
+        }
+      }
+      
+      if (remaining.length !== pendingSync.length) {
+        setPendingSync(remaining);
+        if (remaining.length > 0) {
+          localStorage.setItem('pendingProgress', JSON.stringify(remaining));
+        } else {
+          localStorage.removeItem('pendingProgress');
+        }
+      }
+    };
+
     if (!isOffline && pendingSync.length > 0) {
       syncData();
     }
   }, [isOffline, pendingSync]);
-
-  const syncData = async () => {
-    const remaining: ProgressData[] = [];
-    for (const item of pendingSync) {
-      const success = await sendProgressToServer(item);
-      if (!success) {
-        remaining.push(item);
-      }
-    }
-    
-    if (remaining.length !== pendingSync.length) {
-      setPendingSync(remaining);
-      if (remaining.length > 0) {
-        localStorage.setItem('pendingProgress', JSON.stringify(remaining));
-      } else {
-        localStorage.removeItem('pendingProgress');
-      }
-    }
-  };
 
   const saveProgress = async (data: ProgressData) => {
     if (isOffline) {

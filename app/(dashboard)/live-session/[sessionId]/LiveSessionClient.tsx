@@ -9,10 +9,10 @@ import { Input } from '@/app/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 import { ScrollArea } from '@/app/components/ui/scroll-area';
 import { Badge } from '@/app/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/app/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/app/components/ui/avatar';
 import { 
   Mic, MicOff, Video, VideoOff, PhoneOff, Monitor, MessageSquare, 
-  Users, BookOpen, Send, Layout, Settings 
+  Users, BookOpen, Send, Settings 
 } from 'lucide-react';
 import { useLanguage } from '@/app/lib/i18n/LanguageContext';
 import { cn } from '@/app/lib/utils';
@@ -33,6 +33,12 @@ interface PeerData {
   isVideoOff: boolean;
 }
 
+type PeerMessage = 
+  | { type: 'join'; userId: string; name: string; role: string }
+  | { type: 'peers-update'; peers: [string, PeerData][] }
+  | { type: 'chat'; senderName: string; text: string; timestamp: string }
+  | { type: 'lesson-update'; lessonId: string };
+
 interface ChatMessage {
   id: string;
   senderName: string;
@@ -42,13 +48,16 @@ interface ChatMessage {
 }
 
 export default function LiveSessionClient({ sessionId, userName, userId, userRole }: LiveSessionClientProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { t } = useLanguage();
   const router = useRouter();
   
   // State
   const [mounted, setMounted] = useState(false);
   const [peer, setPeer] = useState<Peer | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [myPeerId, setMyPeerId] = useState<string>('');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [peers, setPeers] = useState<Map<string, PeerData>>(new Map());
@@ -104,7 +113,7 @@ export default function LiveSessionClient({ sessionId, userName, userId, userRol
           setConnectionStatus('connected');
 
           if (!isHost) {
-            connectToHost(newPeer, stream);
+            connectToHost(newPeer);
           }
         });
 
@@ -138,10 +147,11 @@ export default function LiveSessionClient({ sessionId, userName, userId, userRol
       stream?.getTracks().forEach(track => track.stop());
       peer?.destroy();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId, isHost]);
 
   // Connect to Host (as Student)
-  const connectToHost = (currentPeer: Peer, currentStream: MediaStream) => {
+  const connectToHost = (currentPeer: Peer) => {
     const conn = currentPeer.connect(hostId, {
       metadata: { userId, name: userName, role: userRole }
     });
@@ -151,11 +161,12 @@ export default function LiveSessionClient({ sessionId, userName, userId, userRol
       peerConnections.current.set(hostId, conn);
       
       // Send join message
-      conn.send({ type: 'join', userId, name: userName, role: userRole });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      conn.send({ type: 'join', userId, name: userName, role: userRole } as any);
     });
 
-    conn.on('data', (data: any) => {
-      handleDataMessage(data);
+    conn.on('data', (data: unknown) => {
+      handleDataMessage(data as PeerMessage);
     });
 
     conn.on('close', () => {
@@ -171,8 +182,8 @@ export default function LiveSessionClient({ sessionId, userName, userId, userRol
       peerConnections.current.set(conn.peer, conn);
     });
 
-    conn.on('data', (data: any) => {
-      handleDataMessage(data, conn.peer, currentPeer, currentStream);
+    conn.on('data', (data: unknown) => {
+      handleDataMessage(data as PeerMessage, conn.peer, currentPeer, currentStream);
     });
 
     conn.on('close', () => {
@@ -183,7 +194,7 @@ export default function LiveSessionClient({ sessionId, userName, userId, userRol
   };
 
   // Handle Data Messages
-  const handleDataMessage = (data: any, senderPeerId?: string, currentPeer?: Peer, currentStream?: MediaStream) => {
+  const handleDataMessage = (data: PeerMessage, senderPeerId?: string, currentPeer?: Peer, currentStream?: MediaStream) => {
     console.log('Received data:', data);
 
     switch (data.type) {

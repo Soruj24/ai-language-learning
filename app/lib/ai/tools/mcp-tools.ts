@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 

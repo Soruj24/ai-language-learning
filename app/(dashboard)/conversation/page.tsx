@@ -1,4 +1,3 @@
-import { auth } from "@/app/lib/auth";
 import { getSubscription } from "@/app/lib/subscription";
 import ConversationClient from "./ConversationClient";
 

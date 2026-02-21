@@ -1,6 +1,5 @@
 import { createLLM } from "../llm-provider";
-import { AgentExecutor, createOpenAIFunctionsAgent, createStructuredChatAgent } from "langchain/agents";
-import { pull } from "langchain/hub";
+import { AgentExecutor, createStructuredChatAgent } from "langchain/agents";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 import { Tool } from "@langchain/core/tools";
 
@@ -17,7 +16,7 @@ export interface AgentConfig {
   systemPrompt: string;
 }
 
-export async function createAgent({ name, role, tools, systemPrompt }: AgentConfig) {
+export async function createAgent({ tools }: AgentConfig) {
   const model = createLLM({
     // Provider defaults will be used
   });

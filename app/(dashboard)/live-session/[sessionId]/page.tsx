@@ -28,6 +28,7 @@ export default async function LiveSessionPage({ params }: LiveSessionPageProps) 
       sessionId={sessionId} 
       userName={session.user.name || "Anonymous"} 
       userId={session.user.id || "unknown"}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       userRole={(session.user as any).role || "student"}
     />
   );

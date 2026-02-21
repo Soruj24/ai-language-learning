@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ChevronRight, 
@@ -9,7 +9,6 @@ import {
   CheckCircle, 
   XCircle, 
   Trophy,
-  ArrowRight,
   BookOpen,
   Brain,
   MessageSquare,
@@ -118,7 +117,7 @@ export default function InteractiveLessonView({ lesson, onComplete, onExit, onSt
                       <h3 className="text-lg font-bold text-foreground">{item.word}</h3>
                       <p className="text-muted-foreground">{item.translation}</p>
                       {item.example && (
-                        <p className="text-sm text-muted-foreground/80 mt-1 italic">"{item.example}"</p>
+                        <p className="text-sm text-muted-foreground/80 mt-1 italic">&quot;{item.example}&quot;</p>
                       )}
                     </div>
                     <Button

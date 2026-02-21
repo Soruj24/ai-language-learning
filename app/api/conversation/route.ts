@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { message, history, mode } = await req.json();
+    const { message, history } = await req.json();
 
     if (!message) {
       return NextResponse.json(
@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Convert history to LangChain message format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const chatHistory = history.map((msg: any) => {
       if (msg.role === 'user') {
         return new HumanMessage(msg.content);

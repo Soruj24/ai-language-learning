@@ -6,6 +6,8 @@ import { pronunciationAnalyzerTool } from "../tools/mcp-tools";
 const tools = [pronunciationAnalyzerTool];
 
 export async function createPronunciationAgent(targetLanguage: string = 'Spanish') {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _target = targetLanguage; // Suppress unused variable warning while keeping signature
   const llm = createLLM({
     temperature: 0.2,
   });

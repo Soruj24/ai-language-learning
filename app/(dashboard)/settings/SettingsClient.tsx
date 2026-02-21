@@ -6,17 +6,16 @@ import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
 import { useLanguage } from '@/app/lib/i18n/LanguageContext';
 import { Bell, BellOff } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function SettingsClient() {
   const { t, learningLanguage } = useLanguage();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-
-  useEffect(() => {
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-        setNotificationsEnabled(true);
+        return true;
     }
-  }, []);
+    return false;
+  });
 
   const toggleNotifications = async () => {
     if (notificationsEnabled) {

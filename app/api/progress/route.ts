@@ -6,7 +6,7 @@ export async function POST(req: Request) {
     console.log('Received progress sync:', data);
     // In a real app, save to database
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to sync progress' }, { status: 500 });
   }
 }

@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AnalyticsPage() {
   const session = await auth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const role = (session?.user as any)?.role;
 
   // Restrict to Admin only

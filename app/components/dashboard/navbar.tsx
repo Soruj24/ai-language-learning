@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
-import { Bell, Menu, Search, User, LogOut, Settings as SettingsIcon } from "lucide-react"
+import { Bell, Menu, Search, LogOut, Settings as SettingsIcon } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 
 import { Button } from "@/app/components/ui/button"
@@ -19,11 +18,9 @@ import { Sheet, SheetContent, SheetTrigger } from "@/app/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar"
 import { Sidebar } from "@/app/components/dashboard/sidebar"
 import { LanguageSelector } from "@/app/components/language-selector"
-import { useLanguage } from "@/app/lib/i18n/LanguageContext"
 
 export function Navbar() {
   const { data: session } = useSession()
-  const { t } = useLanguage()
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-6 backdrop-blur-xl">

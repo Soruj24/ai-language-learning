@@ -12,7 +12,6 @@ import {
 } from "@/app/components/ui/card";
 import { Badge } from "@/app/components/ui/badge";
 import { Check, Loader2 } from "lucide-react";
-import { useLanguage } from "@/app/lib/i18n/LanguageContext";
 
 interface BillingClientProps {
   subscription: {
@@ -26,7 +25,6 @@ export default function BillingClient({
   subscription,
 }: BillingClientProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { t } = useLanguage(); // Assuming useLanguage hook exists
 
   const onSubscribe = async (plan: "pro" | "premium") => {
     try {

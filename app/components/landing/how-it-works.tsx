@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { UserPlus, MessageSquare, LineChart } from "lucide-react";
-import { Card, CardContent } from "@/app/components/ui/card";
 
 const steps = [
   {

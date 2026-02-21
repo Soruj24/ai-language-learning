@@ -7,7 +7,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { NextResponse } from "next/server";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 
-export async function GET(req: Request) {
+export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -69,6 +69,7 @@ export async function POST(req: Request) {
     const cleanResult = result.replace(/```json/g, "").replace(/```/g, "").trim();
     const plan = JSON.parse(cleanResult);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     user.learningPlan = plan.map((day: any) => ({
       ...day,
       completed: false
@@ -99,6 +100,7 @@ export async function PUT(req: Request) {
   }
 
   if (user.learningPlan) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dayPlan = user.learningPlan.find((p: any) => p.day === day);
     if (dayPlan) {
       dayPlan.completed = completed;
