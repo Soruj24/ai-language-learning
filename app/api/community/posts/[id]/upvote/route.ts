@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import connectDB from '@/app/lib/db';
-import CommunityPost from '@/app/lib/models/CommunityPost';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/app/lib/auth";
+import connectDB from "@/app/lib/db";
+import CommunityPost from "@/app/lib/models/CommunityPost";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = params;
@@ -18,7 +18,7 @@ export async function POST(
 
     const post = await CommunityPost.findById(id);
     if (!post) {
-      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
     // Check if user already upvoted
@@ -26,7 +26,9 @@ export async function POST(
 
     if (hasUpvoted) {
       // Remove upvote
-      post.upvotes = post.upvotes.filter((uid: any) => uid.toString() !== session.user.id);
+      post.upvotes = post.upvotes.filter(
+        (uid: string) => uid !== session.user!.id,
+      );
       post.upvoteCount = Math.max(0, post.upvoteCount - 1);
     } else {
       // Add upvote
@@ -36,15 +38,15 @@ export async function POST(
 
     await post.save();
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       upvotes: post.upvoteCount,
-      hasUpvoted: !hasUpvoted 
+      hasUpvoted: !hasUpvoted,
     });
   } catch (error) {
-    console.error('Error upvoting post:', error);
+    console.error("Error upvoting post:", error);
     return NextResponse.json(
-      { error: 'Failed to upvote post' },
-      { status: 500 }
+      { error: "Failed to upvote post" },
+      { status: 500 },
     );
   }
 }

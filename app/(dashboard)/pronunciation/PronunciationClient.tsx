@@ -69,7 +69,9 @@ export default function PronunciationClient({
   // Initialize AudioContext
   useEffect(() => {
     const AudioContextClass =
-      window.AudioContext || (window as any).webkitAudioContext;
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
     if (AudioContextClass) {
       audioContextRef.current = new AudioContextClass();
     }
@@ -95,7 +97,7 @@ export default function PronunciationClient({
         const data = await response.json();
 
         if (data.items && Array.isArray(data.items)) {
-          const wordList = data.items.map((item: any) => item.word);
+          const wordList = data.items.map((item: { word: string }) => item.word);
           setWords(wordList);
           if (wordList.length > 0) setSelectedWord(wordList[0]);
         } else {

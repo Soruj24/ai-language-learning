@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { auth } from '@/app/lib/auth';
 import dbConnect from '@/app/lib/db';
 import User from '@/app/lib/models/User';
 import { formatDistanceToNow } from 'date-fns';
