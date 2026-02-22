@@ -5,6 +5,14 @@ import { Button } from "@/app/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/app/components/ui/dialog";
 
 export function Hero() {
   return (
@@ -44,12 +52,34 @@ export function Hero() {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
-          <Link href="#demo">
-            <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-full border-gray-700 bg-white/5 backdrop-blur-sm text-white hover:bg-white/10 transition-all hover:scale-105">
-              <Play className="mr-2 h-5 w-5 fill-current" />
-              Watch Demo
-            </Button>
-          </Link>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-full border-gray-700 bg-white/5 backdrop-blur-sm text-white hover:bg-white/10 transition-all hover:scale-105">
+                <Play className="mr-2 h-5 w-5 fill-current" />
+                Watch Demo
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[800px] bg-[#0F172A] border-gray-800">
+              <DialogHeader>
+                <DialogTitle className="text-2xl text-white">Platform Demo</DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  See how our AI tutor helps you master a new language.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-900 border border-gray-800 flex items-center justify-center group">
+                {/* Placeholder for actual video */}
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10" />
+                <div className="text-center z-10 p-6">
+                  <div className="w-16 h-16 rounded-full bg-indigo-600/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <Play className="w-8 h-8 text-indigo-400 fill-current ml-1" />
+                  </div>
+                  <p className="text-lg font-medium text-white mb-2">Interactive Demo Loading...</p>
+                  <p className="text-sm text-gray-400">We are preparing a personalized demo experience for you.</p>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="mt-12 flex items-center justify-center gap-8 text-gray-500 text-sm font-medium">
