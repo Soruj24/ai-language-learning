@@ -76,6 +76,11 @@ export async function POST(req: Request) {
     }));
     user.learningGoal = goal || user.learningGoal;
     
+    // Fix invalid role if present (self-healing)
+    if (user.role === 'user') {
+      user.role = 'student';
+    }
+
     await user.save();
 
     return NextResponse.json({ success: true, learningPlan: user.learningPlan });
