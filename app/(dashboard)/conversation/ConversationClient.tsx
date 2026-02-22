@@ -160,7 +160,10 @@ export default function ConversationClient({ isPremium }: ConversationClientProp
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to fetch response');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to fetch response');
+      }
 
       const data = await response.json();
       
@@ -181,6 +184,13 @@ export default function ConversationClient({ isPremium }: ConversationClientProp
       setMessages(prev => [...prev, botMsg]);
     } catch (error) {
       console.error('Error sending message:', error);
+      // Fallback message
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: "I'm sorry, I'm having trouble connecting to the AI service right now. Please check your connection or try again later.",
+        timestamp: new Date(),
+      }]);
     } finally {
       setIsLoading(false);
     }

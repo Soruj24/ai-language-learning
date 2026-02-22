@@ -163,9 +163,9 @@ export async function getAnalyticsData() {
     })
     .slice(0, 5)
     .map(p => ({
-      lessonId: p.lessonId,
+      lessonId: p.lessonId ? p.lessonId.toString() : 'unknown',
       score: p.score,
-      date: p.updatedAt || p.createdAt,
+      date: (p.updatedAt || p.createdAt) ? new Date(p.updatedAt || p.createdAt).toISOString() : new Date().toISOString(),
       type: 'Lesson' // could be more specific if we had lesson details
     }));
 
