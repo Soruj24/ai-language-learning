@@ -1,70 +1,95 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
 import { Badge } from '@/app/components/ui/badge';
 import { useLanguage } from '@/app/lib/i18n/LanguageContext';
-import { MessageSquare, ThumbsUp, Users, Share2 } from 'lucide-react';
-
-// Mock Data
-const initialPosts = [
-  { id: 1, author: 'Sarah', content: 'Does anyone have tips for rolling Rs in Spanish?', upvotes: 5, comments: 2, time: '2 hours ago', category: 'Pronunciation' },
-  { id: 2, author: 'Mike', content: 'Just finished my first 30-day streak! Feels amazing.', upvotes: 12, comments: 4, time: '5 hours ago', category: 'Motivation' },
-];
-
-const initialGroups = [
-  { id: 1, name: 'Spanish Beginners', members: 120, description: 'A supportive group for those just starting with Spanish.' },
-  { id: 2, name: 'French Literature Club', members: 45, description: 'Discussing classic French novels and poetry.' },
-  { id: 3, name: 'German Grammar Geeks', members: 80, description: 'Deep dive into German grammar rules and exceptions.' },
-];
-
-const initialCorrections = [
-  { id: 1, author: 'Juan', original: 'Yo gusto la pizza.', corrected: 'Me gusta la pizza.', explanation: 'In Spanish, we use "Me gusta" for "I like".', upvotes: 3 },
-  { id: 2, author: 'Anna', original: 'J\'ai allé au cinéma.', corrected: 'Je suis allé au cinéma.', explanation: 'The verb "aller" uses "être" as the auxiliary verb in passé composé.', upvotes: 7 },
-];
-
-const initialResources = [
-  { id: 1, title: '500 Most Common Spanish Words', type: 'PDF', link: '#', upvotes: 15 },
-  { id: 2, title: 'French Pronunciation Guide', type: 'Video', link: '#', upvotes: 22 },
-  { id: 3, title: 'German Case System Chart', type: 'Image', link: '#', upvotes: 8 },
-];
+import { MessageSquare, ThumbsUp, Users, Share2, Loader2, Send } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 export default function CommunityClient() {
   const { t } = useLanguage();
-  const [posts, setPosts] = useState(initialPosts);
-  const [groups] = useState(initialGroups);
-  const [corrections, setCorrections] = useState(initialCorrections);
-  const [resources, setResources] = useState(initialResources);
+  const [activeTab, setActiveTab] = useState('discussion');
+  const [posts, setPosts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [newPostContent, setNewPostContent] = useState('');
+  
+  // States for other creation forms
+  const [correctionOriginal, setCorrectionOriginal] = useState('');
+  const [correctionCorrected, setCorrectionCorrected] = useState('');
+  const [correctionExplanation, setCorrectionExplanation] = useState('');
+  const [resourceTitle, setResourceTitle] = useState('');
+  const [resourceLink, setResourceLink] = useState('');
+  const [resourceType, setResourceType] = useState('Link');
 
-  const handleUpvotePost = (id: number) => {
-    setPosts(posts.map(post => post.id === id ? { ...post, upvotes: post.upvotes + 1 } : post));
+  const fetchPosts = async (type: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/community/posts?type=${type}`);
+      if (response.ok) {
+        const data = await response.json();
+        setPosts(data.posts);
+      }
+    } catch (error) {
+      console.error('Failed to fetch posts:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleUpvoteCorrection = (id: number) => {
-    setCorrections(corrections.map(c => c.id === id ? { ...c, upvotes: c.upvotes + 1 } : c));
+  useEffect(() => {
+    fetchPosts(activeTab);
+  }, [activeTab]);
+
+  const handleUpvote = async (id: string) => {
+    try {
+      const response = await fetch(`/api/community/posts/${id}/upvote`, {
+        method: 'POST',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPosts(posts.map(post => 
+          post._id === id ? { ...post, upvoteCount: data.upvotes } : post
+        ));
+      }
+    } catch (error) {
+      console.error('Failed to upvote:', error);
+    }
   };
 
-  const handleUpvoteResource = (id: number) => {
-    setResources(resources.map(r => r.id === id ? { ...r, upvotes: r.upvotes + 1 } : r));
+  const handleCreatePost = async (type: string, data: any) => {
+    try {
+      const response = await fetch('/api/community/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, ...data }),
+      });
+
+      if (response.ok) {
+        const { post } = await response.json();
+        setPosts([post, ...posts]);
+        // Reset forms
+        setNewPostContent('');
+        setCorrectionOriginal('');
+        setCorrectionCorrected('');
+        setCorrectionExplanation('');
+        setResourceTitle('');
+        setResourceLink('');
+      }
+    } catch (error) {
+      console.error('Failed to create post:', error);
+    }
   };
 
-  const handleCreatePost = () => {
-    if (!newPostContent.trim()) return;
-    const newPost = {
-      id: posts.length + 1,
-      author: 'You',
-      content: newPostContent,
-      upvotes: 0,
-      comments: 0,
-      time: 'Just now',
-      category: 'General'
-    };
-    setPosts([newPost, ...posts]);
-    setNewPostContent('');
+  const formatDate = (dateString: string) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+    } catch (e) {
+      return 'just now';
+    }
   };
 
   return (
@@ -74,18 +99,18 @@ export default function CommunityClient() {
           <h1 className="text-3xl font-bold tracking-tight">{t('communityForum')}</h1>
           <p className="text-muted-foreground">{t('connectLearners')}</p>
         </div>
-        <Button>{t('createPost')}</Button>
       </div>
 
-      <Tabs defaultValue="discussions" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="discussions">{t('discussionPosts')}</TabsTrigger>
-          <TabsTrigger value="groups">{t('languageGroups')}</TabsTrigger>
-          <TabsTrigger value="corrections">{t('peerCorrections')}</TabsTrigger>
-          <TabsTrigger value="resources">{t('shareResources')}</TabsTrigger>
+          <TabsTrigger value="discussion">{t('discussionPosts')}</TabsTrigger>
+          <TabsTrigger value="group">{t('languageGroups')}</TabsTrigger>
+          <TabsTrigger value="correction">{t('peerCorrections')}</TabsTrigger>
+          <TabsTrigger value="resource">{t('shareResources')}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="discussions" className="space-y-4">
+        {/* Discussion Tab */}
+        <TabsContent value="discussion" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>{t('createPost')}</CardTitle>
@@ -96,126 +121,238 @@ export default function CommunityClient() {
                   placeholder={t('writeComment')} 
                   value={newPostContent}
                   onChange={(e) => setNewPostContent(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newPostContent.trim()) {
+                      handleCreatePost('discussion', { content: newPostContent });
+                    }
+                  }}
                 />
-                <Button onClick={handleCreatePost}>{t('share')}</Button>
+                <Button 
+                  onClick={() => handleCreatePost('discussion', { content: newPostContent })}
+                  disabled={!newPostContent.trim()}
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
               </div>
             </CardContent>
           </Card>
           
-          <div className="space-y-4">
-            {posts.map(post => (
-              <Card key={post.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{post.author}</CardTitle>
-                      <div className="text-sm text-muted-foreground">{post.time} • <Badge variant="outline">{post.category}</Badge></div>
+          {isLoading ? (
+            <div className="flex justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center p-8 text-muted-foreground">
+              No discussions yet. Be the first to start one!
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {posts.map(post => (
+                <Card key={post._id}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-lg">{post.authorName}</CardTitle>
+                        <div className="text-sm text-muted-foreground">
+                          {formatDate(post.createdAt)} • <Badge variant="outline">{post.category}</Badge>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p>{post.content}</p>
-                </CardContent>
-                <CardFooter className="flex gap-4">
-                  <Button variant="ghost" size="sm" onClick={() => handleUpvotePost(post.id)}>
-                    <ThumbsUp className="mr-2 h-4 w-4" /> {post.upvotes} {t('upvote')}
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <MessageSquare className="mr-2 h-4 w-4" /> {post.comments} {t('comments')}
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p>{post.content}</p>
+                  </CardContent>
+                  <CardFooter className="flex gap-4">
+                    <Button variant="ghost" size="sm" onClick={() => handleUpvote(post._id)}>
+                      <ThumbsUp className="mr-2 h-4 w-4" /> {post.upvoteCount} {t('upvote')}
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      <MessageSquare className="mr-2 h-4 w-4" /> {post.commentCount} {t('comments')}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
-        <TabsContent value="groups" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {groups.map(group => (
-              <Card key={group.id}>
-                <CardHeader>
-                  <CardTitle>{group.name}</CardTitle>
-                  <CardDescription>{group.members} {t('members')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{group.description}</p>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full" variant="outline"><Users className="mr-2 h-4 w-4" /> {t('joinGroup')}</Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+        {/* Groups Tab */}
+        <TabsContent value="group" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Create Group</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-2">
+                <Input 
+                  placeholder="Group Name" 
+                  value={newPostContent} // reusing state for simplicity
+                  onChange={(e) => setNewPostContent(e.target.value)}
+                />
+                 <Input 
+                  placeholder="Description" 
+                  value={correctionExplanation} // reusing state
+                  onChange={(e) => setCorrectionExplanation(e.target.value)}
+                />
+                <Button 
+                  className="w-full"
+                  onClick={() => handleCreatePost('group', { title: newPostContent, content: correctionExplanation })}
+                  disabled={!newPostContent.trim()}
+                >
+                  Create Group
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {isLoading ? (
+            <div className="flex justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {posts.map(group => (
+                <Card key={group._id}>
+                  <CardHeader>
+                    <CardTitle>{group.title}</CardTitle>
+                    <CardDescription>{group.memberCount} {t('members')}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">{group.content}</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button className="w-full" variant="outline"><Users className="mr-2 h-4 w-4" /> {t('joinGroup')}</Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
-        <TabsContent value="corrections" className="space-y-4">
+        {/* Corrections Tab */}
+        <TabsContent value="correction" className="space-y-4">
           <Card>
              <CardHeader>
                  <CardTitle>{t('submitCorrection')}</CardTitle>
                  <CardDescription>{t('correctText')}</CardDescription>
              </CardHeader>
-             <CardContent>
-                 <Button className="w-full">{t('submitCorrection')}</Button>
+             <CardContent className="space-y-4">
+                 <Input 
+                   placeholder="Original Text (with error)" 
+                   value={correctionOriginal}
+                   onChange={(e) => setCorrectionOriginal(e.target.value)}
+                 />
+                 <Input 
+                   placeholder="Corrected Text" 
+                   value={correctionCorrected}
+                   onChange={(e) => setCorrectionCorrected(e.target.value)}
+                 />
+                 <Input 
+                   placeholder="Explanation" 
+                   value={correctionExplanation}
+                   onChange={(e) => setCorrectionExplanation(e.target.value)}
+                 />
+                 <Button 
+                   className="w-full"
+                   onClick={() => handleCreatePost('correction', { 
+                     originalText: correctionOriginal, 
+                     correctedText: correctionCorrected, 
+                     explanation: correctionExplanation 
+                   })}
+                   disabled={!correctionOriginal.trim() || !correctionCorrected.trim()}
+                 >
+                   {t('submitCorrection')}
+                 </Button>
              </CardContent>
           </Card>
           
-          <div className="space-y-4">
-            {corrections.map(correction => (
-              <Card key={correction.id}>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">{t('postedBy')} {correction.author}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded">
-                    <span className="font-semibold text-red-600 dark:text-red-400">{t('originalText')}:</span> {correction.original}
-                  </div>
-                  <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded">
-                    <span className="font-semibold text-green-600 dark:text-green-400">{t('correctedText')}:</span> {correction.corrected}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">{correction.explanation}</p>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="ghost" size="sm" onClick={() => handleUpvoteCorrection(correction.id)}>
-                    <ThumbsUp className="mr-2 h-4 w-4" /> {correction.upvotes} {t('upvote')}
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {posts.map(correction => (
+                <Card key={correction._id}>
+                  <CardHeader>
+                    <CardTitle className="text-sm font-medium">{t('postedBy')} {correction.authorName}</CardTitle>
+                    <div className="text-xs text-muted-foreground">{formatDate(correction.createdAt)}</div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded">
+                      <span className="font-semibold text-red-600 dark:text-red-400">{t('originalText')}:</span> {correction.originalText}
+                    </div>
+                    <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded">
+                      <span className="font-semibold text-green-600 dark:text-green-400">{t('correctedText')}:</span> {correction.correctedText}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">{correction.explanation}</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="ghost" size="sm" onClick={() => handleUpvote(correction._id)}>
+                      <ThumbsUp className="mr-2 h-4 w-4" /> {correction.upvoteCount} {t('upvote')}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
-        <TabsContent value="resources" className="space-y-4">
+        {/* Resources Tab */}
+        <TabsContent value="resource" className="space-y-4">
             <Card>
                 <CardHeader>
                     <CardTitle>{t('shareResources')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="grid gap-2">
-                        <Input placeholder={t('resourceTitle')} />
-                        <Input placeholder={t('resourceLink')} />
-                        <Button className="w-full">{t('share')}</Button>
+                        <Input 
+                          placeholder={t('resourceTitle')} 
+                          value={resourceTitle}
+                          onChange={(e) => setResourceTitle(e.target.value)}
+                        />
+                        <Input 
+                          placeholder={t('resourceLink')} 
+                          value={resourceLink}
+                          onChange={(e) => setResourceLink(e.target.value)}
+                        />
+                        <Button 
+                          className="w-full"
+                          onClick={() => handleCreatePost('resource', { title: resourceTitle, link: resourceLink, resourceType: 'Link' })}
+                          disabled={!resourceTitle.trim() || !resourceLink.trim()}
+                        >
+                          {t('share')}
+                        </Button>
                     </div>
                 </CardContent>
             </Card>
 
-            <div className="grid gap-4 md:grid-cols-2">
-                {resources.map(resource => (
-                    <Card key={resource.id}>
-                        <CardHeader>
-                            <CardTitle className="text-lg">{resource.title}</CardTitle>
-                            <div className="text-sm text-muted-foreground"><Badge>{resource.type}</Badge></div>
-                        </CardHeader>
-                        <CardFooter className="justify-between">
-                            <Button variant="ghost" size="sm" onClick={() => handleUpvoteResource(resource.id)}>
-                                <ThumbsUp className="mr-2 h-4 w-4" /> {resource.upvotes}
-                            </Button>
-                            <Button variant="outline" size="sm">
-                                <Share2 className="mr-2 h-4 w-4" /> {t('share')}
-                            </Button>
-                        </CardFooter>
-                    </Card>
+            {isLoading ? (
+              <div className="flex justify-center p-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {posts.map(resource => (
+                  <Card key={resource._id}>
+                    <CardHeader>
+                      <CardTitle>{resource.title}</CardTitle>
+                      <CardDescription>{t('postedBy')} {resource.authorName}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <a href={resource.link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">
+                        {resource.link}
+                      </a>
+                    </CardContent>
+                    <CardFooter>
+                      <Button variant="ghost" size="sm" onClick={() => handleUpvote(resource._id)}>
+                        <ThumbsUp className="mr-2 h-4 w-4" /> {resource.upvoteCount} {t('upvote')}
+                      </Button>
+                    </CardFooter>
+                  </Card>
                 ))}
-            </div>
+              </div>
+            )}
         </TabsContent>
       </Tabs>
     </div>

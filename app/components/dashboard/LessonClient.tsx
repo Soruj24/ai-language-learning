@@ -335,6 +335,8 @@ export default function LessonClient({ id }: LessonClientProps) {
                 <option value="Italian">Italian</option>
                 <option value="Japanese">Japanese</option>
                 <option value="Chinese">Chinese</option>
+                <option value="Bangla">Bangla</option>
+                <option value="English">English</option>
               </select>
             </div>
           </CardContent>

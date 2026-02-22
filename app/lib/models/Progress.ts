@@ -38,7 +38,7 @@ const ProgressSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+}, { timestamps: true });
 
 // Compound index to quickly find user progress for a specific lesson
 ProgressSchema.index({ userId: 1, lessonId: 1 }, { unique: true });

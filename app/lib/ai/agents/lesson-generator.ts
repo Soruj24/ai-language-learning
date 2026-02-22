@@ -1,7 +1,7 @@
 import { createLLM } from "../llm-provider";
 import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
-import { vocabularyGeneratorTool, translationTool } from "../tools/mcp-tools";
+import {  translationTool } from "../tools/mcp-tools";
 
 const tools = [translationTool];
 

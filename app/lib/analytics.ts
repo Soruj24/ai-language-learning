@@ -17,10 +17,20 @@ export async function getAnalyticsData() {
 
   // Fetch progress for the last 30 days
   const thirtyDaysAgo = subDays(new Date(), 30);
-  const progressData = await Progress.find({
+  const rawProgressData = await Progress.find({
     userId: session.user.id,
-    updatedAt: { $gte: thirtyDaysAgo },
-  }).sort({ updatedAt: 1 });
+    $or: [
+      { updatedAt: { $gte: thirtyDaysAgo } },
+      { createdAt: { $gte: thirtyDaysAgo } }
+    ]
+  });
+
+  // Sort by date ascending (oldest first) for charts
+  const progressData = rawProgressData.sort((a, b) => {
+    const dateA = new Date(a.updatedAt || a.createdAt).getTime();
+    const dateB = new Date(b.updatedAt || b.createdAt).getTime();
+    return dateA - dateB;
+  });
 
   // 1. Daily Study Time (Last 7 days)
   const today = new Date();
@@ -67,18 +77,26 @@ export async function getAnalyticsData() {
     .slice(-10);
 
   // 3. Vocabulary Growth (Cumulative)
-  // Assuming each completed lesson adds ~10 words (simplified logic)
+  // Assuming each completed lesson adds ~5 words on average
   let cumulativeWords = 0;
   const vocabularyGrowth = progressData
     .filter(p => p.completed)
     .map((p) => {
-      cumulativeWords += 10; // Placeholder increment
+      cumulativeWords += 5; 
       return {
         week: format(p.updatedAt || p.createdAt, "MMM d"),
         words: cumulativeWords,
       };
     })
     .slice(-10); // Last 10 data points
+
+  // If no progress data, show current words learned as a single point
+  if (vocabularyGrowth.length === 0 && user.wordsLearned > 0) {
+      vocabularyGrowth.push({
+          week: format(new Date(), "MMM d"),
+          words: user.wordsLearned
+      });
+  }
 
   // 4. Skills Breakdown (Average scores)
   const skills = [
@@ -90,19 +108,29 @@ export async function getAnalyticsData() {
     { subject: 'Reading', A: 0, fullMark: 100 },
   ];
 
-  if (progressData.length > 0) {
-    const avgPronunciation = progressData.reduce((acc, curr) => acc + (curr.pronunciationScore || 0), 0) / (progressData.filter(p => p.pronunciationScore).length || 1);
-    const avgGrammar = progressData.reduce((acc, curr) => acc + (curr.grammarScore || 0), 0) / (progressData.filter(p => p.grammarScore).length || 1);
+  // Calculate averages from progress data
+  const avgPronunciation = progressData.length > 0 
+    ? progressData.reduce((acc, curr) => acc + (curr.pronunciationScore || 0), 0) / (progressData.filter(p => p.pronunciationScore).length || 1)
+    : 0;
     
-    // Update skills array
-    skills.find(s => s.subject === 'Pronunciation')!.A = Math.round(avgPronunciation);
-    skills.find(s => s.subject === 'Grammar')!.A = Math.round(avgGrammar);
-    skills.find(s => s.subject === 'Speaking')!.A = Math.round(avgPronunciation); // Proxy
-    // Others are placeholders or derived
-    skills.find(s => s.subject === 'Vocabulary')!.A = 85; // Placeholder or user.wordsLearned logic
-    skills.find(s => s.subject === 'Listening')!.A = 90; // Placeholder
-    skills.find(s => s.subject === 'Reading')!.A = 88; // Placeholder
-  }
+  const avgGrammar = progressData.length > 0
+    ? progressData.reduce((acc, curr) => acc + (curr.grammarScore || 0), 0) / (progressData.filter(p => p.grammarScore).length || 1)
+    : 0;
+
+  // Scale other skills based on user stats
+  // Assuming 500 words = 100% vocabulary mastery (for beginner level)
+  const vocabScore = Math.min(100, Math.round((user.wordsLearned || 0) / 5)); 
+  // Assuming 50 lessons = 100% for listening/reading (proxy metrics)
+  const listeningScore = Math.min(100, Math.round((user.lessonsCompleted || 0) * 2)); 
+  const readingScore = Math.min(100, Math.round((user.lessonsCompleted || 0) * 2.5)); 
+  
+  // Update skills array
+  skills.find(s => s.subject === 'Pronunciation')!.A = Math.round(avgPronunciation) || (user.pronunciationScore || 0);
+  skills.find(s => s.subject === 'Grammar')!.A = Math.round(avgGrammar) || (user.grammarAccuracy || 0);
+  skills.find(s => s.subject === 'Speaking')!.A = Math.round(avgPronunciation) || (user.pronunciationScore || 0); // Proxy
+  skills.find(s => s.subject === 'Vocabulary')!.A = vocabScore; 
+  skills.find(s => s.subject === 'Listening')!.A = listeningScore; 
+  skills.find(s => s.subject === 'Reading')!.A = readingScore; 
 
   // Achievements (User model)
   const userAchievements = user.achievements || [];
@@ -126,6 +154,21 @@ export async function getAnalyticsData() {
     };
   });
 
+  // 5. Recent Activity
+  const recentActivity = [...progressData] // Clone to avoid reversing the main array
+    .sort((a, b) => {
+      const dateA = new Date(a.updatedAt || a.createdAt).getTime();
+      const dateB = new Date(b.updatedAt || b.createdAt).getTime();
+      return dateB - dateA; // Descending
+    })
+    .slice(0, 5)
+    .map(p => ({
+      lessonId: p.lessonId,
+      score: p.score,
+      date: p.updatedAt || p.createdAt,
+      type: 'Lesson' // could be more specific if we had lesson details
+    }));
+
   return {
     xp: user.xpPoints || 0,
     level: user.level || "Beginner",
@@ -142,5 +185,8 @@ export async function getAnalyticsData() {
     pronunciationHistory,
     grammarHistory,
     achievements,
+    recentActivity,
   };
 }
+
+export type AnalyticsData = Awaited<ReturnType<typeof getAnalyticsData>>;

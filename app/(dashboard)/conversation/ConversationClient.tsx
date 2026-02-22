@@ -64,13 +64,58 @@ export default function ConversationClient({ isPremium }: ConversationClientProp
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMode, setSelectedMode] = useState('casual');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [sessions] = useState<ChatSession[]>([
-    { id: '1', title: 'Ordering Coffee', date: new Date(), preview: 'Can I have a latte please?' },
-    { id: '2', title: 'Job Interview Practice', date: new Date(Date.now() - 86400000), preview: 'Tell me about yourself.' },
-  ]);
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  const fetchHistory = async () => {
+    try {
+      const res = await fetch('/api/conversation');
+      if (res.ok) {
+        const data = await res.json();
+        setSessions(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch history:', error);
+    }
+  };
+
+  const loadSession = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`/api/conversation/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSessionId(data._id);
+        setSelectedMode(data.mode);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setMessages(data.messages.map((m: any) => ({
+          id: m._id,
+          role: m.role,
+          content: m.content,
+          corrections: m.corrections,
+          translation: m.translation,
+          timestamp: new Date(m.createdAt)
+        })));
+      }
+    } catch (error) {
+      console.error('Failed to load session:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const startNewSession = () => {
+    setSessionId(null);
+    setMessages([]);
+    setSelectedMode('casual');
+  };
 
   useEffect(() => {
     // Scroll to bottom on new messages
@@ -110,7 +155,7 @@ export default function ConversationClient({ isPremium }: ConversationClientProp
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMsg.content,
-          history: messages.map(m => ({ role: m.role, content: m.content })),
+          sessionId: sessionId,
           mode: selectedMode,
         }),
       });
@@ -118,6 +163,11 @@ export default function ConversationClient({ isPremium }: ConversationClientProp
       if (!response.ok) throw new Error('Failed to fetch response');
 
       const data = await response.json();
+      
+      if (data.sessionId && !sessionId) {
+        setSessionId(data.sessionId);
+        fetchHistory(); // Refresh history list
+      }
 
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
@@ -192,14 +242,19 @@ export default function ConversationClient({ isPremium }: ConversationClientProp
           <h2 className="font-semibold flex items-center gap-2">
             <History className="w-4 h-4" /> History
           </h2>
-          <Button variant="ghost" size="icon" onClick={() => setMessages([])}>
+          <Button variant="ghost" size="icon" onClick={startNewSession}>
             <Plus className="w-4 h-4" />
           </Button>
         </div>
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-2">
             {sessions.map((session) => (
-              <Button key={session.id} variant="ghost" className="w-full justify-start text-left h-auto py-3 px-3">
+              <Button 
+                key={session.id} 
+                variant={sessionId === session.id ? "secondary" : "ghost"} 
+                className="w-full justify-start text-left h-auto py-3 px-3"
+                onClick={() => loadSession(session.id)}
+              >
                 <div className="overflow-hidden">
                   <div className="font-medium truncate">{session.title}</div>
                   <div className="text-xs text-muted-foreground truncate">{session.preview}</div>

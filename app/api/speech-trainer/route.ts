@@ -14,19 +14,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // In a real app, we would process the audio file here to extract phonemes or transcode it.
-    // For this implementation, we'll simulate the analysis or pass a placeholder.
-    // We'll use the text provided by the user (what they intended to say) as context.
-
-    // Mock analysis for now, or use a speech-to-text service if available.
-    // Since we are using the chain which expects text and analysis, we will mock the analysis part
-    // or rely on the LLM to infer from the text what the likely issues might be if we provided the transcription.
+    // In a production environment, we would send the audioFile to a Speech-to-Text (STT) service
+    // (e.g., Google Cloud Speech, AWS Transcribe, or OpenAI Whisper) to get a phonetic transcription.
+    // Since this environment does not have external API keys for audio processing services,
+    // we will utilize the LLM to perform a "predictive analysis" based on the text.
     
-    // For now, we'll just pass the text to the chain.
+    // The LLM will identify challenging words and potential pronunciation pitfalls for a learner
+    // of the target language. This provides immediate, educational feedback without requiring
+    // real-time audio analysis infrastructure.
+
+    const analysisContext = "Audio analysis unavailable. Please analyze the text for likely pronunciation difficulties for a learner. Identify words that are typically hard to pronounce and explain how to pronounce them correctly. Assume the user might struggle with these common pitfalls.";
+    
     const chain = createPronunciationChain();
     const result = await chain.invoke({
       text: text,
-      analysis: "User audio input provided (simulated phoneme analysis)", 
+      analysis: analysisContext, 
     });
 
     return NextResponse.json(result);

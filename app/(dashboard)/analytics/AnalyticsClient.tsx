@@ -15,72 +15,6 @@ import {
 } from 'recharts';
 import { useLanguage } from '@/app/lib/i18n/LanguageContext';
 
-// Enhanced Mock Data
-const mockStats = {
-  xp: 2450,
-  level: "Intermediate",
-  levelProgress: 65, // percentage
-  streak: 12,
-  lessonsCompleted: 42,
-  wordsLearned: 324,
-  speakingTime: 285, // minutes
-  pronunciationScore: 88,
-  grammarAccuracy: 76,
-  dailyStudyTime: [
-    { day: 'Mon', minutes: 25 },
-    { day: 'Tue', minutes: 45 },
-    { day: 'Wed', minutes: 30 },
-    { day: 'Thu', minutes: 15 },
-    { day: 'Fri', minutes: 60 },
-    { day: 'Sat', minutes: 40 },
-    { day: 'Sun', minutes: 55 },
-  ],
-  skills: [
-    { subject: 'Vocabulary', A: 85, fullMark: 100 },
-    { subject: 'Grammar', A: 76, fullMark: 100 },
-    { subject: 'Pronunciation', A: 88, fullMark: 100 },
-    { subject: 'Listening', A: 92, fullMark: 100 },
-    { subject: 'Speaking', A: 80, fullMark: 100 },
-    { subject: 'Reading', A: 95, fullMark: 100 },
-  ],
-  vocabularyGrowth: [
-    { week: 'W1', words: 20 },
-    { week: 'W2', words: 45 },
-    { week: 'W3', words: 80 },
-    { week: 'W4', words: 124 },
-    { week: 'W5', words: 180 },
-    { week: 'W6', words: 240 },
-    { week: 'W7', words: 290 },
-    { week: 'W8', words: 324 },
-  ],
-  pronunciationHistory: [
-    { session: '1', score: 65 },
-    { session: '2', score: 70 },
-    { session: '3', score: 68 },
-    { session: '4', score: 75 },
-    { session: '5', score: 82 },
-    { session: '6', score: 80 },
-    { session: '7', score: 88 },
-  ],
-  grammarHistory: [
-    { session: '1', score: 60 },
-    { session: '2', score: 65 },
-    { session: '3', score: 70 },
-    { session: '4', score: 72 },
-    { session: '5', score: 75 },
-    { session: '6', score: 78 },
-    { session: '7', score: 76 },
-  ],
-  achievements: [
-    { id: '1', name: 'First Steps', description: 'Complete your first lesson', icon: '🎯', date: '2023-10-01', unlocked: true },
-    { id: '2', name: 'Week Warrior', description: '7 day streak', icon: '🔥', date: '2023-10-08', unlocked: true },
-    { id: '3', name: 'Vocab Master', description: 'Learn 100 words', icon: '📚', date: '2023-10-15', unlocked: true },
-    { id: '4', name: 'Scholar', description: 'Reach Intermediate level', icon: '🎓', date: '2023-11-01', unlocked: true },
-    { id: '5', name: 'Perfect Pitch', description: 'Score 100% in pronunciation', icon: '🎤', date: null, unlocked: false },
-    { id: '6', name: 'Social Butterfly', description: 'Complete 5 conversations', icon: '🦋', date: null, unlocked: false },
-  ]
-};
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -106,7 +40,7 @@ interface AnalyticsClientProps {
 
 export default function AnalyticsClient({ initialStats }: AnalyticsClientProps) {
   const { learningLanguage } = useLanguage();
-  const [stats] = useState(initialStats || mockStats);
+  const [stats] = useState(initialStats);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -121,6 +55,16 @@ export default function AnalyticsClient({ initialStats }: AnalyticsClientProps) 
           <div className="w-16 h-16 bg-muted rounded-full mx-auto mb-4" />
           <div className="h-6 w-32 bg-muted rounded mx-auto" />
         </div>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-2xl font-bold">No analytics data available yet.</h2>
+        <p className="text-muted-foreground mt-2">Start your first lesson to see your progress!</p>
+        <Button className="mt-4" onClick={() => window.location.href = '/lesson/new'}>Start Learning</Button>
       </div>
     );
   }

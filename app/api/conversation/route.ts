@@ -2,9 +2,42 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createConversationChain } from '@/app/lib/ai/chains';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import { getSubscription } from "@/app/lib/subscription";
+import { auth } from "@/app/lib/auth";
+import connectDB from "@/app/lib/db";
+import Conversation from "@/app/lib/models/Conversation";
 
+// GET: Fetch conversation history (list)
+export async function GET() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  await connectDB();
+  const conversations = await Conversation.find({ userId: session.user.id })
+    .sort({ updatedAt: -1 })
+    .select('title createdAt messages mode')
+    .limit(20);
+
+  const history = conversations.map(c => ({
+    id: c._id,
+    title: c.title,
+    date: c.createdAt,
+    preview: c.messages[c.messages.length - 1]?.content || "New conversation",
+    mode: c.mode
+  }));
+
+  return NextResponse.json(history);
+}
+
+// POST: Send message and get response
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const subscription = await getSubscription();
 
     if (!subscription || subscription.plan !== 'premium' || subscription.status !== 'active') {
@@ -14,7 +47,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { message, history } = await req.json();
+    const { message, sessionId, mode } = await req.json();
 
     if (!message) {
       return NextResponse.json(
@@ -23,9 +56,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convert history to LangChain message format
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const chatHistory = history.map((msg: any) => {
+    await connectDB();
+
+    let conversation;
+    let chatHistory = [];
+
+    if (sessionId) {
+        conversation = await Conversation.findOne({ _id: sessionId, userId: session.user.id });
+    }
+
+    if (!conversation) {
+        conversation = new Conversation({
+            userId: session.user.id,
+            mode: mode || 'casual',
+            messages: [],
+            title: message.substring(0, 30) + (message.length > 30 ? '...' : '')
+        });
+    }
+
+    // Prepare history for LangChain
+    chatHistory = conversation.messages.map((msg: any) => {
       if (msg.role === 'user') {
         return new HumanMessage(msg.content);
       } else {
@@ -34,12 +84,6 @@ export async function POST(req: NextRequest) {
     });
 
     // Initialize the conversation chain
-    // Note: Ideally we'd inject the mode into the prompt, but the current chain 
-    // implementation might need a slight adjustment to accept 'mode' if not already handling it via history context.
-    // The current createConversationChain prompt says "You are a helpful language conversation partner..."
-    // We can prepend a system message or rely on the history. 
-    // Let's stick to the chain as defined for now, which takes { message, history }.
-    
     const chain = createConversationChain();
     
     // Invoke the chain
@@ -48,7 +92,25 @@ export async function POST(req: NextRequest) {
       history: chatHistory,
     });
 
-    return NextResponse.json(result);
+    // Save to DB
+    conversation.messages.push({
+        role: 'user',
+        content: message
+    });
+
+    conversation.messages.push({
+        role: 'assistant',
+        content: result.response,
+        corrections: result.corrections,
+        translation: result.translation
+    });
+
+    await conversation.save();
+
+    return NextResponse.json({
+        ...result,
+        sessionId: conversation._id
+    });
   } catch (error) {
     console.error('Error in conversation API:', error);
     return NextResponse.json(

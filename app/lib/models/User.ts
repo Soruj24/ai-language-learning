@@ -86,6 +86,22 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     sparse: true,
   },
+  learningGoal: {
+    type: String,
+  },
+  lastActive: {
+    type: Date,
+    default: Date.now,
+  },
+  learningPlan: [{
+    day: Number,
+    title: String,
+    activities: [String],
+    completed: {
+      type: Boolean,
+      default: false
+    }
+  }],
   flashcards: [{
     front: String,
     back: String,
@@ -115,6 +131,6 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+}, { timestamps: true });
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);
